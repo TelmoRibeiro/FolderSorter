@@ -3,33 +3,45 @@
 #include <set>
 #include <iostream>
 
-namespace filesystem = std::filesystem;
+
+namespace fs = std::filesystem;
 using std::vector;
 using std::set;
 using std::string;
 
-vector<filesystem::path> get_files_path(const filesystem::path& path) {
-    vector<filesystem::path> files_path;
+
+// get all regular files in the directory, optionally filtered by extension
+vector<fs::path> get_files_path(const fs::path& path, const string& extension = "") {
+    vector<fs::path> files_path;
     
-    for (const auto& file : filesystem::directory_iterator(path)) {
-        files_path.push_back(file.path());
+    for (const auto& entry : fs::directory_iterator(path)) {
+        if (fs::is_regular_file(entry)) {
+            if (extension.empty() || entry.path().extension().string() == extension) {
+                files_path.push_back(entry.path());
+            }
+        }
     }
 
     return files_path;
 }
 
 int main() {
-    filesystem::path path = "C:/Users/telmo/Desktop/FolderSorter";
-    vector<filesystem::path> files_path = get_files_path(path);
+    fs::path path = "C:/Users/telmo/Desktop/FolderSorter";
+    vector<fs::path> all_files = get_files_path(path);
 
     set<string> extensions;
-    
-    for (const auto& file : files_path) {
+    for (const auto& file : all_files) {
         extensions.insert(file.extension().string());
     }
 
-    for (const string extension : extensions) {
-        std::cout << extension << '\n';
+    for (const auto& extension : extensions) {
+        vector<fs::path> matching_files = get_files_path(path, extension);
+        
+        std::cout << "Extension: " << extension << "\n";
+        for (const auto& file : matching_files) {
+            std::cout << " " << file.string() << "\n";
+        }
+        std::cout << std::endl;
     }
 
     return 0;
