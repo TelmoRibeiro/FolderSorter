@@ -25,6 +25,12 @@ vector<fs::path> get_files_path(const fs::path& path, const string& extension = 
     return files_path;
 }
 
+void move_files_to_folder(const fs::path& file, const fs::path& target_folder) {
+    fs::create_directories(target_folder);
+    fs::path destination = target_folder / file.filename();
+    fs::rename(file, destination);
+}
+
 int main() {
     fs::path path = "C:/Users/telmo/Desktop/FolderSorter";
     vector<fs::path> all_files = get_files_path(path);
@@ -42,6 +48,11 @@ int main() {
             std::cout << " " << file.string() << "\n";
         }
         std::cout << std::endl;
+
+        for (const auto& file : matching_files) {
+            const fs::path folder = path / (file.extension().string() + "_files");
+            move_files_to_folder(file, folder);
+        }
     }
 
     return 0;
